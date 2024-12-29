@@ -7,13 +7,16 @@ const Colors = {
   text: "#237fdb",
   textSecondary: "#64748b",
   error: "#fb7185",
+  success: "#10b981",
+  warning: "#fbbf24",
 };
 
 const Typography = {
   fontSizes: {
     small: 12,
     medium: 16,
-    large: 24,
+    larger: 20,
+    large: 22,
     title: 26,
   },
   fontWeights: {

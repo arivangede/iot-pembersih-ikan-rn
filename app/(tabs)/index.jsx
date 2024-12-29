@@ -15,15 +15,6 @@ import { useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import ErrorModal from "../../components/modals/ErrorModal";
 
-const listIkan = [
-  { label: "megalodon" },
-  { label: "paus biru" },
-  { label: "spongebob" },
-  { label: "tuan crab" },
-  { label: "plankton" },
-  { label: "squidward" },
-];
-
 const { Colors, Typography, Shadows } = Theme;
 
 const index = () => {
@@ -46,7 +37,7 @@ const index = () => {
           },
         ]}
       >
-        <Text style={{ color: Colors.text }}>{item.label}</Text>
+        <Text style={{ color: Colors.text }}>{item.name}</Text>
       </View>
     );
   };
@@ -56,7 +47,6 @@ const index = () => {
       const response = await api.get("/fish-types");
       const data = response.data.data;
       setFishList(data);
-
       setLoading((prev) => ({ ...prev, fishList: false }));
     } catch (error) {
       console.error("error get fishList", error);
@@ -100,7 +90,7 @@ const index = () => {
               style={styles.dropdown}
               placeholder="Select Fish Type"
               value={selectedFish}
-              onChange={(e) => setSelectedFish(e.label)}
+              onChange={(e) => setSelectedFish(e.id)}
               selectedTextStyle={{ color: Colors.text }}
               placeholderStyle={{ color: Colors.text }}
               containerStyle={styles.dropdownItemContainer}

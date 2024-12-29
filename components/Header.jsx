@@ -6,7 +6,11 @@ import Theme from "../constants/Theme";
 
 const { Colors, Typography } = Theme;
 
-const Header = ({ title = "Header", showDateData = false }) => {
+const Header = ({
+  title = "Header",
+  showDateData = false,
+  subtitle = null,
+}) => {
   const handleBack = () => {
     router.back();
   };
@@ -20,6 +24,7 @@ const Header = ({ title = "Header", showDateData = false }) => {
         {showDateData && (
           <Text style={styles.dateText}>{new Date().toDateString()}</Text>
         )}
+        {subtitle && <Text style={styles.subtitleText}>{subtitle}</Text>}
       </View>
     </View>
   );
@@ -37,6 +42,12 @@ const styles = StyleSheet.create({
   titleText: {
     color: Colors.text,
     fontSize: Typography.fontSizes.title,
+    fontWeight: Typography.fontWeights.bold,
+  },
+  subtitleText: {
+    paddingLeft: 0,
+    color: Colors.textSecondary,
+    fontSize: Typography.fontSizes.small,
     fontWeight: Typography.fontWeights.bold,
   },
   dateText: {
