@@ -4,17 +4,53 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Vibration,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Theme from "../constants/Theme";
 import speedName from "../utils/speedName";
+import { Ionicons } from "@expo/vector-icons";
 
-const { Colors, Typography, Shadows } = Theme;
+const { Colors, Typography } = Theme;
 
 const CleanFishProcessModal = ({ fishData, handleClose }) => {
   const speed_name = speedName(fishData.cleaning_speed);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isForceStopped, setIsForceStopped] = useState(false);
+  const [isDone, setIsDone] = useState(false);
+
+  const [remainingTime, setRemainingTime] = useState(
+    fishData.cleaning_duration * 60
+  );
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (isProcessing) {
+      setTimeout(() => {
+        intervalRef.current = setInterval(() => {
+          setRemainingTime((prevTime) => {
+            if (prevTime <= 1) {
+              clearInterval(intervalRef.current);
+              setIsProcessing(false);
+              setIsDone(true);
+              Vibration.vibrate([200, 100, 200]);
+              return 0;
+            }
+            return prevTime - 1;
+          });
+        }, 50);
+
+        return () => clearInterval(intervalRef.current);
+      }, 2000);
+    }
+  }, [isProcessing]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   const handleStartProcess = () => {
     setIsProcessing(true);
@@ -22,13 +58,15 @@ const CleanFishProcessModal = ({ fishData, handleClose }) => {
 
   const handleForceStop = () => {
     setIsProcessing(false);
+    setIsForceStopped(true);
+    Vibration.vibrate();
   };
 
   return (
     <Modal transparent statusBarTranslucent animationType="fade">
       <View style={styles.modalOverlay}>
         <View style={styles.modal}>
-          {!isProcessing ? (
+          {!isProcessing && !isForceStopped && !isDone ? (
             <>
               <Text style={styles.modalTitle}>Details:</Text>
               <View style={styles.fishDetaisContainer}>
@@ -93,18 +131,61 @@ const CleanFishProcessModal = ({ fishData, handleClose }) => {
                 </TouchableOpacity>
               </View>
             </>
-          ) : (
-            <>
+          ) : isProcessing && !isForceStopped && !isDone ? (
+            <View style={styles.forceStoppedContent}>
               <ActivityIndicator size={"large"} color={Colors.primary} />
-              <Text>Cleaning On Process</Text>
-              <Text>about {fishData.cleaning_duration} minute/s</Text>
+              <Text
+                style={{
+                  fontSize: Typography.fontSizes.larger,
+                  fontWeight: Typography.fontWeights.bold,
+                  color: Colors.primary,
+                }}
+              >
+                Cleaning On Process
+              </Text>
+              <Text>Remaining Time: {formatTime(remainingTime)}</Text>
               <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: Colors.error }]}
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: Colors.error, width: "100%" },
+                ]}
                 onPress={handleForceStop}
               >
                 <Text style={styles.text}>Force Stop</Text>
               </TouchableOpacity>
-            </>
+            </View>
+          ) : !isDone && isForceStopped ? (
+            <View style={styles.forceStoppedContent}>
+              <Ionicons name="warning" size={60} color={Colors.textSecondary} />
+              <Text>Cleaning Process is Force Stopped</Text>
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: Colors.textSecondary, width: "100%" },
+                ]}
+                onPress={handleClose}
+              >
+                <Text style={styles.text}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.forceStoppedContent}>
+              <Ionicons
+                name="checkmark"
+                size={60}
+                color={Colors.textSecondary}
+              />
+              <Text>Cleaning Process is Finished</Text>
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: Colors.textSecondary, width: "100%" },
+                ]}
+                onPress={handleClose}
+              >
+                <Text style={styles.text}>Close</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>
@@ -160,5 +241,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     borderRadius: 15,
+  },
+  forceStoppedContent: {
+    width: "100%",
+    padding: 0.1,
+    gap: 10,
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

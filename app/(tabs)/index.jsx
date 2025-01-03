@@ -82,6 +82,8 @@ const index = () => {
 
   useFocusEffect(
     useCallback(() => {
+      setSelectedFish("");
+      setFishList([]);
       getFishList();
     }, [])
   );
