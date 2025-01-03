@@ -55,8 +55,6 @@ const FishDetails = () => {
   const [editMode, setEditMode] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  console.log("fishform: ", fishForm);
-
   const CleanSpeedItem = (data = []) => {
     return data.map((item, index) => (
       <TouchableOpacity

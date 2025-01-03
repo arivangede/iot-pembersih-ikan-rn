@@ -11,9 +11,10 @@ const storeKey = async (key, value) => {
 
 const getKey = async (key) => {
   try {
-    await AsyncStorage.getItem(key);
+    const value = await AsyncStorage.getItem(key);
+    return value;
   } catch (error) {
-    console.error("error whe get key from storage", error);
+    console.error("error when getting key from storage", error);
   }
 };
 

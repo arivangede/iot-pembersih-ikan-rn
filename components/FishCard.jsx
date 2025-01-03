@@ -1,14 +1,9 @@
-import {
-  StyleSheet,
-  Text,
-  Touchable,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import Theme from "../constants/Theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import speedName from "../utils/speedName";
 
 const { Colors, Typography, Shadows } = Theme;
 
@@ -18,13 +13,7 @@ const FishCard = ({
   cleaning_speed,
   cleaning_duration,
 }) => {
-  const speedNames = {
-    50.0: "Slow",
-    100.0: "Medium",
-    150.0: "Fast",
-  };
-
-  const speedName = speedNames[cleaning_speed] || "Unknown";
+  const speed_name = speedName(cleaning_speed);
 
   const to_details = () => {
     router.push(`/fish-type/details/${fish_id}`);
@@ -39,7 +28,7 @@ const FishCard = ({
           >
             Cleaning Speed:
           </Text>{" "}
-          {speedName}
+          {speed_name}
         </Text>
         <Text style={styles.text}>
           <Text

@@ -14,17 +14,24 @@ import api from "../../utils/api";
 import { useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import ErrorModal from "../../components/modals/ErrorModal";
+import CleanFishProcessModal from "../../components/CleanFishProcessModal";
 
 const { Colors, Typography, Shadows } = Theme;
 
 const index = () => {
   const [fishList, setFishList] = useState([]);
   const [selectedFish, setSelectedFish] = useState("");
+  const [fishData, setFishData] = useState({});
   const [loading, setLoading] = useState({
     deviceInfo: true,
     fishList: true,
   });
   const [isErrorDeviceInfo, setIsErrorDeviceInfo] = useState(false);
+  const [showProcessModal, setShowProcessModal] = useState(false);
+
+  const handleCloseModal = () => {
+    setShowProcessModal(false);
+  };
 
   const renderFishList = (item) => {
     return (
@@ -68,6 +75,11 @@ const index = () => {
     fetch();
   }, []);
 
+  useEffect(() => {
+    const selectedFishData = fishList.find((fish) => fish.id === selectedFish);
+    setFishData(selectedFishData || {});
+  }, [selectedFish]);
+
   useFocusEffect(
     useCallback(() => {
       getFishList();
@@ -97,7 +109,14 @@ const index = () => {
               itemTextStyle={{ color: Colors.text }}
               renderItem={renderFishList}
             />
-            <TouchableOpacity style={styles.btnPrimary}>
+            <TouchableOpacity
+              style={[
+                styles.btnPrimary,
+                { opacity: selectedFish == "" ? 0.5 : 1 },
+              ]}
+              disabled={selectedFish == ""}
+              onPress={() => setShowProcessModal(true)}
+            >
               <Text
                 style={{
                   fontSize: Typography.fontSizes.medium,
@@ -135,6 +154,12 @@ const index = () => {
           )
         )}
       </View>
+      {showProcessModal && (
+        <CleanFishProcessModal
+          fishData={fishData}
+          handleClose={handleCloseModal}
+        />
+      )}
     </SafeAreaView>
   );
 };
