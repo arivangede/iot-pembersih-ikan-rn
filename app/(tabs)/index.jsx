@@ -15,6 +15,7 @@ import { useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import ErrorModal from "../../components/modals/ErrorModal";
 import CleanFishProcessModal from "../../components/CleanFishProcessModal";
+import { getKey } from "../../utils/storage";
 
 const { Colors, Typography, Shadows } = Theme;
 
@@ -28,6 +29,7 @@ const index = () => {
   });
   const [isErrorDeviceInfo, setIsErrorDeviceInfo] = useState(false);
   const [showProcessModal, setShowProcessModal] = useState(false);
+  const [deviceId, setDeviceId] = useState("");
 
   const handleCloseModal = () => {
     setShowProcessModal(false);
@@ -50,6 +52,7 @@ const index = () => {
   };
 
   const getFishList = async () => {
+    setLoading((prev) => ({ ...prev, fishList: true }));
     try {
       const response = await api.get("/fish-types");
       const data = response.data.data;
@@ -57,7 +60,14 @@ const index = () => {
       setLoading((prev) => ({ ...prev, fishList: false }));
     } catch (error) {
       console.error("error get fishList", error);
+    } finally {
+      setLoading((prev) => ({ ...prev, fishList: false }));
     }
+  };
+
+  const getDeviceId = async () => {
+    const id = await getKey("device_id");
+    return id;
   };
 
   useEffect(() => {
@@ -66,6 +76,8 @@ const index = () => {
         await getDeviceInfo();
         setIsErrorDeviceInfo(false);
         getFishList();
+        const deviceId = await getDeviceId();
+        setDeviceId(deviceId);
       } catch (error) {
         setIsErrorDeviceInfo(true);
       } finally {
@@ -160,6 +172,7 @@ const index = () => {
         <CleanFishProcessModal
           fishData={fishData}
           handleClose={handleCloseModal}
+          deviceId={deviceId}
         />
       )}
     </SafeAreaView>

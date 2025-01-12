@@ -11,14 +11,25 @@ import React, { useState, useEffect, useRef } from "react";
 import Theme from "../constants/Theme";
 import speedName from "../utils/speedName";
 import { Ionicons } from "@expo/vector-icons";
+import api from "../utils/api";
+import NetInfo from "@react-native-community/netinfo";
 
 const { Colors, Typography } = Theme;
 
-const CleanFishProcessModal = ({ fishData, handleClose }) => {
+const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
   const speed_name = speedName(fishData.cleaning_speed);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isForceStopped, setIsForceStopped] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [loading, setLoading] = useState({
+    start: false,
+    stop: false,
+  });
+  const [processPayloadData, setProcessPayloadData] = useState({
+    framework: "React Native",
+    connection_type: "",
+  });
+  const [cleaningOperation, setCleaningOperation] = useState(null);
 
   const [remainingTime, setRemainingTime] = useState(
     fishData.cleaning_duration * 60
@@ -39,7 +50,9 @@ const CleanFishProcessModal = ({ fishData, handleClose }) => {
             }
             return prevTime - 1;
           });
-        }, 50);
+        }, 1000);
+
+        Vibration.cancel();
 
         return () => clearInterval(intervalRef.current);
       }, 2000);
@@ -52,15 +65,69 @@ const CleanFishProcessModal = ({ fishData, handleClose }) => {
     return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const handleStartProcess = () => {
-    setIsProcessing(true);
+  const handleStartProcess = async () => {
+    if (!deviceId || !fishData.id) {
+      console.error("Device ID or Fish Data ID is missing");
+      return;
+    }
+
+    const payload = {
+      start_time: new Date().toISOString(),
+      ...processPayloadData,
+    };
+
+    setLoading((prev) => ({ ...prev, start: true }));
+    try {
+      const response = await api.post(
+        `/operations/${deviceId}/${fishData.id}`,
+        payload
+      );
+
+      setCleaningOperation(response.data.data);
+      console.log(response.data.data);
+
+      setIsProcessing(true);
+    } catch (error) {
+      console.error("error handleStartProcess:", error);
+    } finally {
+      setLoading((prev) => ({ ...prev, start: false }));
+    }
   };
 
-  const handleForceStop = () => {
+  const handleForceStop = async () => {
     setIsProcessing(false);
     setIsForceStopped(true);
-    Vibration.vibrate();
+    console.log(cleaningOperation.id);
+    try {
+      const response = await api.get(
+        `/operations/force-stop/${cleaningOperation.id}`
+      );
+      console.log("handleForceStop:", response.data);
+      Vibration.vibrate();
+    } catch (error) {
+      console.error("error handleForceStop:", error);
+    }
   };
+
+  useEffect(() => {
+    const getNetInfo = NetInfo.addEventListener((state) => {
+      const netType = state.type;
+      if (netType == "cellular") {
+        setProcessPayloadData((prev) => ({
+          ...prev,
+          connection_type: netType,
+          cellular_generation: state.details.cellularGeneration,
+        }));
+      } else {
+        setProcessPayloadData((prev) => ({
+          ...prev,
+          connection_type: netType,
+        }));
+      }
+    });
+
+    return () => getNetInfo();
+  }, []);
 
   return (
     <Modal transparent statusBarTranslucent animationType="fade">
@@ -114,18 +181,30 @@ const CleanFishProcessModal = ({ fishData, handleClose }) => {
                 <TouchableOpacity
                   style={[
                     styles.actionBtn,
-                    { backgroundColor: Colors.primary },
+                    {
+                      backgroundColor: Colors.primary,
+                      opacity: loading.start ? 0.5 : 1,
+                    },
                   ]}
                   onPress={handleStartProcess}
+                  disabled={loading.start}
                 >
-                  <Text style={styles.text}>Start Process</Text>
+                  {loading.start ? (
+                    <ActivityIndicator size="small" color={Colors.background} />
+                  ) : (
+                    <Ionicons name="play" size={15} color={Colors.background} />
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.actionBtn,
-                    { backgroundColor: Colors.textSecondary },
+                    {
+                      backgroundColor: Colors.textSecondary,
+                      opacity: loading.start ? 0.5 : 1,
+                    },
                   ]}
                   onPress={handleClose}
+                  disabled={loading.start}
                 >
                   <Text style={styles.text}>Cancel</Text>
                 </TouchableOpacity>
