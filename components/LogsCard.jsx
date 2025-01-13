@@ -1,17 +1,19 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import Theme from "../constants/Theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import capitalize from "../utils/capitalize";
+import formatDate from "../utils/formatDate";
+import api from "../utils/api";
 
 const { Colors, Typography, Shadows } = Theme;
 
-const LogsCard = ({ logId, fishName, status, datetime }) => {
+const LogsCard = ({ logId, fishName, status, datetime, isRead }) => {
   const getBadge = (status) => {
     const formattedStatus = status.toLowerCase();
     switch (formattedStatus) {
-      case "done":
+      case "finished":
         return { icon: "checkmark-circle-outline", backgroundColor: "#4ade80" };
 
       case "processing":
@@ -31,9 +33,16 @@ const LogsCard = ({ logId, fishName, status, datetime }) => {
 
   return (
     <View style={styles.card}>
+      {!isRead && <View style={styles.unreadLog}></View>}
       <View style={styles.content}>
-        <Text style={styles.fishTypeText}>{fishName}</Text>
-        <Text style={styles.text}>{datetime}</Text>
+        <Text
+          style={styles.fishTypeText}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {fishName}
+        </Text>
+        <Text style={styles.text}>{formatDate(datetime)}</Text>
       </View>
       <View style={styles.statusContainer}>
         <View
@@ -68,7 +77,6 @@ export default LogsCard;
 
 const styles = StyleSheet.create({
   card: {
-    width: "100%",
     marginVertical: 10,
     overflow: "hidden",
 
@@ -76,14 +84,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: 5,
 
     borderRadius: 10,
     backgroundColor: Colors.card,
 
     ...Shadows.small,
+    position: "relative",
   },
   badge: {
-    margin: 20,
+    flex: 0.2,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 20,
@@ -93,7 +103,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   badgeText: {
-    fontSize: Typography.fontSizes.medium,
+    fontSize: Typography.fontSizes.small,
     fontWeight: Typography.fontWeights.bold,
     color: Colors.background,
   },
@@ -109,20 +119,29 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeights.regular,
   },
   content: {
+    flex: 1,
     flexDirection: "column",
     gap: 5,
     padding: 20,
   },
   statusContainer: {
-    flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-end",
   },
   btnCircle: {
+    flex: 0.4,
     height: "100%",
-    width: 60,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors.primary,
+  },
+  unreadLog: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.error,
   },
 });
