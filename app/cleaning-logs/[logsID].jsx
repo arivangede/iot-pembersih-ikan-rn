@@ -19,7 +19,10 @@ const { Colors, Typography } = Theme;
 const LogDetails = () => {
   const { logsID } = useLocalSearchParams();
   const [logData, setLogData] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState({
+    fetch: true,
+    action: false,
+  });
   const [error, setError] = useState(null);
 
   const readedLog = async () => {
@@ -78,10 +81,25 @@ const LogDetails = () => {
     }
   };
 
+  const removeResult = async () => {
+    setLoading((prev) => ({ ...prev, action: true }));
+    try {
+      const response = await api.delete(`/operations/remove/${logsID}`);
+      console.log(response.data);
+      router.back();
+    } catch (error) {
+      console.error("Error removeResult", error);
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }));
+    }
+  };
+
   useEffect(() => {
     const fetchQueue = async () => {
-      await readedLog();
-      await fetchLogData();
+      const data = await fetchLogData();
+      if (data.isRead === false) {
+        await readedLog();
+      }
     };
 
     fetchQueue();
@@ -99,7 +117,7 @@ const LogDetails = () => {
             paddingBottom: 100,
           }}
         >
-          {!loading && !error ? (
+          {!loading.fetch && !error ? (
             <>
               <Text style={styles.sectionTitle}>Process Details:</Text>
               <View style={styles.sectionWrapper}>
@@ -207,6 +225,16 @@ const LogDetails = () => {
                   </Text>
                 </View>
               </View>
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={removeResult}
+              >
+                {loading.action ? (
+                  <ActivityIndicator size="small" color={Colors.background} />
+                ) : (
+                  <Text>Remove This Result</Text>
+                )}
+              </TouchableOpacity>
             </>
           ) : !error ? (
             <ActivityIndicator size="large" color={Colors.primary} />
@@ -294,5 +322,12 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSizes.medium,
     fontWeight: Typography.fontWeights.bold,
     color: Colors.background,
+  },
+  removeButton: {
+    padding: 10,
+    backgroundColor: Colors.error,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
   },
 });

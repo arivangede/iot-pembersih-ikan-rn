@@ -30,6 +30,9 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
     connection_type: "",
   });
   const [cleaningOperation, setCleaningOperation] = useState(null);
+  const [isError, setIsError] = useState({
+    anotherProcessing: false,
+  });
 
   const [remainingTime, setRemainingTime] = useState(
     fishData.cleaning_duration * 60
@@ -84,10 +87,14 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
       );
 
       setCleaningOperation(response.data.data);
-      console.log(response.data.data);
 
       setIsProcessing(true);
+      setIsDone(false);
     } catch (error) {
+      if (error.response.status === 400) {
+        setIsError((prev) => ({ ...prev, anotherProcessing: true }));
+        Vibration.vibrate();
+      }
       console.error("error handleStartProcess:", error);
     } finally {
       setLoading((prev) => ({ ...prev, start: false }));
@@ -133,7 +140,10 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
     <Modal transparent statusBarTranslucent animationType="fade">
       <View style={styles.modalOverlay}>
         <View style={styles.modal}>
-          {!isProcessing && !isForceStopped && !isDone ? (
+          {!isProcessing &&
+          !isForceStopped &&
+          !isDone &&
+          !isError.anotherProcessing ? (
             <>
               <Text style={styles.modalTitle}>Details:</Text>
               <View style={styles.fishDetaisContainer}>
@@ -210,7 +220,10 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
                 </TouchableOpacity>
               </View>
             </>
-          ) : isProcessing && !isForceStopped && !isDone ? (
+          ) : isProcessing &&
+            !isForceStopped &&
+            !isDone &&
+            !isError.anotherProcessing ? (
             <View style={styles.forceStoppedContent}>
               <ActivityIndicator size={"large"} color={Colors.primary} />
               <Text
@@ -220,7 +233,7 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
                   color: Colors.primary,
                 }}
               >
-                Cleaning On Process
+                Cleaning In Process
               </Text>
               <Text>Remaining Time: {formatTime(remainingTime)}</Text>
               <TouchableOpacity
@@ -233,7 +246,7 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
                 <Text style={styles.text}>Force Stop</Text>
               </TouchableOpacity>
             </View>
-          ) : !isDone && isForceStopped ? (
+          ) : !isError.anotherProcessing && !isDone && isForceStopped ? (
             <View style={styles.forceStoppedContent}>
               <Ionicons name="warning" size={60} color={Colors.textSecondary} />
               <Text>Cleaning Process is Force Stopped</Text>
@@ -241,6 +254,22 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
                 style={[
                   styles.actionBtn,
                   { backgroundColor: Colors.textSecondary, width: "100%" },
+                ]}
+                onPress={handleClose}
+              >
+                <Text style={styles.text}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          ) : isError.anotherProcessing ? (
+            <View style={styles.forceStoppedContent}>
+              <Ionicons name="close-circle" size={60} color={Colors.error} />
+              <Text>
+                There is another process in progress, please wait until finished
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  { backgroundColor: Colors.primary, width: "100%" },
                 ]}
                 onPress={handleClose}
               >
