@@ -1,7 +1,7 @@
 const speedName = (cleaningSpeed) => {
-  if (cleaningSpeed < 75) return "Slow";
-  if (cleaningSpeed < 125) return "Medium";
-  if (cleaningSpeed < 175) return "Fast";
+  if (cleaningSpeed == 100) return "Slow";
+  if (cleaningSpeed == 200) return "Medium";
+  if (cleaningSpeed == 400) return "Fast";
   return "Unknown";
 };
 

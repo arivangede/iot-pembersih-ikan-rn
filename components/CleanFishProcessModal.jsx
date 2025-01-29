@@ -104,10 +104,10 @@ const CleanFishProcessModal = ({ fishData, handleClose, deviceId }) => {
   const handleForceStop = async () => {
     setIsProcessing(false);
     setIsForceStopped(true);
-    console.log(cleaningOperation.id);
+    console.log(cleaningOperation.CleaningOperation.id);
     try {
       const response = await api.get(
-        `/operations/force-stop/${cleaningOperation.id}`
+        `/operations/force-stop/${cleaningOperation.CleaningOperation.id}`
       );
       console.log("handleForceStop:", response.data);
       Vibration.vibrate();

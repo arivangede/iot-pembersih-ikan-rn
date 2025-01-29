@@ -26,19 +26,19 @@ const cleanSpeedData = [
     color: Colors.accent,
     icon: "time-outline",
     speedName: "Slow",
-    speedValue: 50.0,
+    speedValue: 100.0,
   },
   {
     color: Colors.warning,
     icon: "car-outline",
     speedName: "Medium",
-    speedValue: 100.0,
+    speedValue: 200.0,
   },
   {
     color: Colors.error,
     icon: "rocket-outline",
     speedName: "Fast",
-    speedValue: 150.0,
+    speedValue: 400.0,
   },
 ];
 

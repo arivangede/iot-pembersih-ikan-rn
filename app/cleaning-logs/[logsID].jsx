@@ -25,10 +25,9 @@ const LogDetails = () => {
   });
   const [error, setError] = useState(null);
 
-  const readedLog = async () => {
+  const readedLog = async (logsID) => {
     try {
       const response = await api.get(`/operations/read/${logsID}`);
-      console.log(response.data);
     } catch (error) {
       console.error("Error readedLog", error);
     }
@@ -73,6 +72,7 @@ const LogDetails = () => {
       const response = await api.get(`/operations/${logsID}`);
       const data = response.data.data;
       setLogData(data);
+      return data;
     } catch (error) {
       console.error("Error fetchLogData", error);
       setError(error);
@@ -85,7 +85,6 @@ const LogDetails = () => {
     setLoading((prev) => ({ ...prev, action: true }));
     try {
       const response = await api.delete(`/operations/remove/${logsID}`);
-      console.log(response.data);
       router.back();
     } catch (error) {
       console.error("Error removeResult", error);
@@ -97,13 +96,11 @@ const LogDetails = () => {
   useEffect(() => {
     const fetchQueue = async () => {
       const data = await fetchLogData();
-      if (data.isRead === false) {
-        await readedLog();
-      }
+      await readedLog(data.id);
     };
 
     fetchQueue();
-  }, [logsID]);
+  }, []);
   return (
     <SafeAreaView style={styles.container}>
       <Header title="Cleaning Log" showDateData={true} />

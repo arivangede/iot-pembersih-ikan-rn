@@ -1,11 +1,10 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useEffect } from "react";
+import React from "react";
 import Theme from "../constants/Theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import capitalize from "../utils/capitalize";
 import formatDate from "../utils/formatDate";
-import api from "../utils/api";
 
 const { Colors, Typography, Shadows } = Theme;
 
