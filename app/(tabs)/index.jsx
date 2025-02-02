@@ -1,3 +1,4 @@
+import "react-native-reanimated";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -5,10 +6,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Theme from "../../constants/Theme";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Dropdown } from "react-native-element-dropdown";
 import getDeviceInfo from "../../utils/getDeviceInfo";
 import api from "../../utils/api";
 import { useFocusEffect } from "expo-router";
@@ -16,12 +22,17 @@ import { Ionicons } from "@expo/vector-icons";
 import ErrorModal from "../../components/modals/ErrorModal";
 import CleanFishProcessModal from "../../components/CleanFishProcessModal";
 import { getKey } from "../../utils/storage";
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 
 const { Colors, Typography, Shadows } = Theme;
 
 const index = () => {
   const [fishList, setFishList] = useState([]);
-  const [selectedFish, setSelectedFish] = useState("");
+  const [selectedFish, setSelectedFish] = useState(null);
   const [fishData, setFishData] = useState({});
   const [loading, setLoading] = useState({
     deviceInfo: true,
@@ -31,24 +42,11 @@ const index = () => {
   const [showProcessModal, setShowProcessModal] = useState(false);
   const [deviceId, setDeviceId] = useState("");
 
+  const bottomsheetref = useRef(null);
+  const snapPoints = useMemo(() => ["30%", "50%"], []);
+
   const handleCloseModal = () => {
     setShowProcessModal(false);
-  };
-
-  const renderFishList = (item) => {
-    return (
-      <View
-        style={[
-          styles.dropdownItems,
-          {
-            backgroundColor:
-              selectedFish == item.label ? Colors.background : Colors.card,
-          },
-        ]}
-      >
-        <Text style={{ color: Colors.text }}>{item.name}</Text>
-      </View>
-    );
   };
 
   const getFishList = async () => {
@@ -88,7 +86,9 @@ const index = () => {
   }, []);
 
   useEffect(() => {
-    const selectedFishData = fishList.find((fish) => fish.id === selectedFish);
+    const selectedFishData = fishList.find(
+      (fish) => fish.id === selectedFish.id
+    );
     setFishData(selectedFishData || {});
   }, [selectedFish]);
 
@@ -101,80 +101,119 @@ const index = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.titleText}>Clean Fish</Text>
+    <SafeAreaView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={styles.container}>
+        <Text style={styles.titleText}>Clean Fish</Text>
 
-      {isErrorDeviceInfo && <ErrorModal />}
+        {isErrorDeviceInfo && <ErrorModal />}
 
-      <View style={styles.dropdownContainer}>
-        {!loading.fishList && fishList.length > 0 ? (
-          <>
-            <Dropdown
-              data={fishList}
-              labelField="name"
-              valueField="id"
-              style={styles.dropdown}
-              placeholder="Select Fish Type"
-              value={selectedFish}
-              onChange={(e) => setSelectedFish(e.id)}
-              selectedTextStyle={{ color: Colors.text }}
-              placeholderStyle={{ color: Colors.text }}
-              containerStyle={styles.dropdownItemContainer}
-              itemTextStyle={{ color: Colors.text }}
-              renderItem={renderFishList}
-            />
-            <TouchableOpacity
-              style={[
-                styles.btnPrimary,
-                { opacity: selectedFish == "" ? 0.5 : 1 },
-              ]}
-              disabled={selectedFish == ""}
-              onPress={() => setShowProcessModal(true)}
-            >
-              <Text
-                style={{
-                  fontSize: Typography.fontSizes.medium,
-                  fontWeight: Typography.fontWeights.bold,
-                  color: Colors.card,
+        <View style={styles.dropdownContainer}>
+          {!loading.fishList && fishList.length > 0 ? (
+            <>
+              <TouchableOpacity
+                style={styles.dropdownButton}
+                onPress={() => {
+                  bottomsheetref.current?.snapToIndex(1);
+                  console.log(bottomsheetref.current);
                 }}
               >
-                Start Cleaning
-              </Text>
-            </TouchableOpacity>
-          </>
-        ) : !loading.fishList && fishList.length == 0 ? (
-          <>
-            <View style={styles.notFoundIconContainer}>
-              <Ionicons
-                name="fish-sharp"
-                color={Colors.textSecondary}
-                size={50}
-              />
-              <Text style={styles.notFoundIconText}>404 Fish Not Found</Text>
-            </View>
-            <Text style={styles.notFoundFishText}>
-              Please register fish types first on "settings" menu to enable
-              cleaning feature
-            </Text>
-          </>
-        ) : (
-          !isErrorDeviceInfo && (
-            <>
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size={"large"} color={Colors.primary} />
-                <Text>loading fish list...</Text>
-              </View>
+                <Text numberOfLines={1}>
+                  {selectedFish.name || "Select Fish Type"}
+                </Text>
+                <Ionicons
+                  name="chevron-down"
+                  color={Colors.textSecondary}
+                  size={24}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.btnPrimary,
+                  { opacity: !selectedFish ? 0.5 : 1 },
+                ]}
+                disabled={!selectedFish}
+                onPress={() => setShowProcessModal(true)}
+              >
+                <Text
+                  style={{
+                    fontSize: Typography.fontSizes.medium,
+                    fontWeight: Typography.fontWeights.bold,
+                    color: Colors.card,
+                  }}
+                >
+                  Start Cleaning
+                </Text>
+              </TouchableOpacity>
             </>
-          )
+          ) : !loading.fishList && fishList.length == 0 ? (
+            <>
+              <View style={styles.notFoundIconContainer}>
+                <Ionicons
+                  name="fish-sharp"
+                  color={Colors.textSecondary}
+                  size={50}
+                />
+                <Text style={styles.notFoundIconText}>404 Fish Not Found</Text>
+              </View>
+              <Text style={styles.notFoundFishText}>
+                Please register fish types first on "settings" menu to enable
+                cleaning feature
+              </Text>
+            </>
+          ) : (
+            !isErrorDeviceInfo && (
+              <>
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size={"large"} color={Colors.primary} />
+                  <Text>loading fish list...</Text>
+                </View>
+              </>
+            )
+          )}
+        </View>
+        {showProcessModal && (
+          <CleanFishProcessModal
+            fishData={fishData}
+            handleClose={handleCloseModal}
+            deviceId={deviceId}
+          />
         )}
-      </View>
-      {showProcessModal && (
-        <CleanFishProcessModal
-          fishData={fishData}
-          handleClose={handleCloseModal}
-          deviceId={deviceId}
-        />
-      )}
+        <BottomSheet
+          ref={bottomsheetref}
+          index={-1}
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+        >
+          <BottomSheetView>
+            <ScrollView
+              contentContainerStyle={{ gap: 5, paddingHorizontal: 10 }}
+            >
+              {fishList.map((item) => (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() =>
+                    setSelectedFish({ id: item.id, name: item.name })
+                  }
+                >
+                  <View
+                    style={[
+                      styles.dropdownItems,
+                      {
+                        backgroundColor:
+                          selectedFish.id == item.id
+                            ? Colors.accent
+                            : Colors.card,
+                      },
+                    ]}
+                  >
+                    <Text style={{ color: Colors.text }}>{item.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </BottomSheetView>
+        </BottomSheet>
+      </GestureHandlerRootView>
     </SafeAreaView>
   );
 };
@@ -201,6 +240,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     gap: 10,
+  },
+  dropdownButton: {
+    width: "70%",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   dropdown: {
     height: 50,

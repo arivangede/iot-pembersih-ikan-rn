@@ -21,7 +21,9 @@ const FishCard = ({
   return (
     <TouchableOpacity style={styles.card} onPress={() => to_details()}>
       <View style={{ width: "70%" }}>
-        <Text style={styles.title_text}>{fish_name}</Text>
+        <Text style={styles.title_text} numberOfLines={2}>
+          {fish_name}
+        </Text>
         <Text style={styles.text}>
           <Text
             style={[styles.text, { fontWeight: Typography.fontWeights.light }]}
