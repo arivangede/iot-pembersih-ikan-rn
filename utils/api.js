@@ -1,10 +1,7 @@
 import axios from "axios";
 
-const IPAddress = "103.129.149.50";
-const PORT = "3001";
-
 const api = axios.create({
-  baseURL: `http://${IPAddress}:${PORT}/api`,
+  baseURL: "http://103.129.149.50:3001/api",
   headers: {
     "Content-Type": "application/json",
   },
