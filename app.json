@@ -20,7 +20,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/react-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jojo.cleanfishiot"
     },
     "web": {
       "favicon": "./assets/favicon.png"
