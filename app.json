@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "fe-rn",
+    "name": "pembersih-ikan",
     "slug": "fe-rn",
-    "scheme":"fe-rn",
+    "scheme": "fe-rn",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/react-icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/react-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/react-icon.png",
         "backgroundColor": "#ffffff"
       }
     },
@@ -27,6 +27,21 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "67d6521d-94e8-456d-98d3-cf8cbc34482f"
+      }
+    },
+    "owner": "arivan23",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/67d6521d-94e8-456d-98d3-cf8cbc34482f"
+    }
   }
 }

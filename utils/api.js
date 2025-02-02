@@ -1,11 +1,10 @@
 import axios from "axios";
 
-// const IPAddress = "192.168.66.253"; // hotspot
-const IPAddress = "192.168.1.10"; // rumah tuedi
-// const IPAddress = "192.168.1.9"; // rumah
+const IPAddress = "103.129.149.50";
+const PORT = "3001";
 
 const api = axios.create({
-  baseURL: `http://${IPAddress}:3000/api`,
+  baseURL: `http://${IPAddress}:${PORT}/api`,
   headers: {
     "Content-Type": "application/json",
   },
