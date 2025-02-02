@@ -1,4 +1,5 @@
 import "react-native-reanimated";
+import "react-native-reanimated";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -6,6 +7,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import React, {
   useCallback,
   useEffect,
@@ -22,6 +30,11 @@ import { Ionicons } from "@expo/vector-icons";
 import ErrorModal from "../../components/modals/ErrorModal";
 import CleanFishProcessModal from "../../components/CleanFishProcessModal";
 import { getKey } from "../../utils/storage";
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import {
   GestureHandlerRootView,
   ScrollView,
@@ -106,6 +119,7 @@ const index = () => {
       <GestureHandlerRootView style={styles.container}>
         <Text style={styles.titleText}>Clean Fish</Text>
 
+        {isErrorDeviceInfo && <ErrorModal />}
         {isErrorDeviceInfo && <ErrorModal />}
 
         <View style={styles.dropdownContainer}>
@@ -240,6 +254,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     gap: 10,
+  },
+  dropdownButton: {
+    width: "70%",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   dropdownButton: {
     width: "70%",
