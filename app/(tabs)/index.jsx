@@ -1,5 +1,4 @@
 import "react-native-reanimated";
-import "react-native-reanimated";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -7,13 +6,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 import React, {
   useCallback,
   useEffect,
@@ -30,11 +22,6 @@ import { Ionicons } from "@expo/vector-icons";
 import ErrorModal from "../../components/modals/ErrorModal";
 import CleanFishProcessModal from "../../components/CleanFishProcessModal";
 import { getKey } from "../../utils/storage";
-import {
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import {
   GestureHandlerRootView,
   ScrollView,
@@ -115,11 +102,10 @@ const index = () => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <GestureHandlerRootView style={styles.container}>
+    <GestureHandlerRootView>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.titleText}>Clean Fish</Text>
 
-        {isErrorDeviceInfo && <ErrorModal />}
         {isErrorDeviceInfo && <ErrorModal />}
 
         <View style={styles.dropdownContainer}>
@@ -192,43 +178,41 @@ const index = () => {
             deviceId={deviceId}
           />
         )}
-        <BottomSheet
-          ref={bottomsheetref}
-          index={-1}
-          snapPoints={snapPoints}
-          enablePanDownToClose={true}
-        >
-          <BottomSheetView>
-            <ScrollView
-              contentContainerStyle={{ gap: 5, paddingHorizontal: 10 }}
-            >
-              {fishList.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  onPress={() =>
-                    setSelectedFish({ id: item.id, name: item.name })
-                  }
+      </SafeAreaView>
+      <BottomSheet
+        ref={bottomsheetref}
+        index={-1}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+      >
+        <BottomSheetView>
+          <ScrollView contentContainerStyle={{ gap: 5, paddingHorizontal: 10 }}>
+            {fishList.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() =>
+                  setSelectedFish({ id: item.id, name: item.name })
+                }
+              >
+                <View
+                  style={[
+                    styles.dropdownItems,
+                    {
+                      backgroundColor:
+                        selectedFish.id == item.id
+                          ? Colors.accent
+                          : Colors.card,
+                    },
+                  ]}
                 >
-                  <View
-                    style={[
-                      styles.dropdownItems,
-                      {
-                        backgroundColor:
-                          selectedFish.id == item.id
-                            ? Colors.accent
-                            : Colors.card,
-                      },
-                    ]}
-                  >
-                    <Text style={{ color: Colors.text }}>{item.name}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </BottomSheetView>
-        </BottomSheet>
-      </GestureHandlerRootView>
-    </SafeAreaView>
+                  <Text style={{ color: Colors.text }}>{item.name}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </BottomSheetView>
+      </BottomSheet>
+    </GestureHandlerRootView>
   );
 };
 
