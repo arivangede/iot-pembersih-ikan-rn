@@ -4,6 +4,7 @@
     "slug": "fe-rn",
     "scheme": "fe-rn",
     "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/react-splash.png",
     "userInterfaceStyle": "light",
@@ -36,9 +37,6 @@
       }
     },
     "owner": "arivan23",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
     "updates": {
       "url": "https://u.expo.dev/67d6521d-94e8-456d-98d3-cf8cbc34482f"
     }
